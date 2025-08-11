@@ -1,0 +1,20 @@
+model Channel {
+  id    Int         @id @default(autoincrement())
+  name  String
+  color Int
+  type  ChannelType
+
+  owner   User @relation(fields: [ownerId], references: [id])
+  ownerId Int
+
+  roles    Role[]
+  users    User[]    @relation("AccesedChannels")
+  messages Message[]
+}
+
+enum ChannelType {
+  Category
+  DMChannel
+  GroupChannel
+  PublicChannel
+}

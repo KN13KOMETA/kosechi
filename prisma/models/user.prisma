@@ -1,0 +1,22 @@
+model User {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique()
+  description String
+  pubKeyHash  String
+  firstSeen   DateTime?
+  lastSeen    DateTime?
+
+  inviter        User?    @relation("InviteAuthor", fields: [inviterId], references: [id])
+  inviterId      Int?
+  inviterComment String
+  invitedAt      DateTime
+  invitees       User[]   @relation("InviteAuthor")
+
+  roles           Role[]
+  files           File[]
+  channels        Channel[]
+  messages        Message[]
+  accesedChannels Channel[] @relation("AccesedChannels")
+
+  @@index([inviterId])
+}

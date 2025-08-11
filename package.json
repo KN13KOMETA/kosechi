@@ -1,18 +1,39 @@
 {
   "name": "kosechi",
-  "version": "1.0.0",
-  "description": "",
-  "main": "src/index.js",
-  "type": "module",
+  "version": "2.0.0-beta",
+  "description": "KOMETA SSH chat",
+  "main": "src/index.ts",
+  "prisma": {
+    "schema": "./prisma"
+  },
   "scripts": {
-    "start": "node ./src/index.js"
+    "p:studio": "npx prisma studio",
+    "p:generate": "npx prisma generate",
+    "start": "node dist/index.js",
+    "build": "npx tsc",
+    "dev": "npx ts-node src/index.ts"
   },
   "keywords": [],
   "author": "KN13KOMETA",
   "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KN13KOMETA/kosechi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KN13KOMETA/kosechi/issues"
+  },
+  "homepage": "https://github.com/KN13KOMETA/kosechi#readme",
   "dependencies": {
-    "@types/node": "^22.0.2",
-    "blessed": "^0.1.81",
-    "ssh2": "^1.15.0"
+    "@prisma/client": "^6.12.0",
+    "ssh2": "^1.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "@types/ssh2": "^1.15.5",
+    "prisma": "^6.12.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   }
 }

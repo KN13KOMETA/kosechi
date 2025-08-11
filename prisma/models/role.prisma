@@ -1,0 +1,11 @@
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String
+  color Int
+
+  order      Int
+  permisions Int
+
+  channels Channel[]
+  users    User[]
+}

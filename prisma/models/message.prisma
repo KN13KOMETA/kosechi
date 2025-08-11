@@ -1,0 +1,10 @@
+model Message {
+  id        String   @id @default(uuid())
+  text      String
+  timestamp DateTime
+
+  channel   Channel @relation(fields: [channelId], references: [id])
+  channelId Int
+  author    User    @relation(fields: [authorId], references: [id])
+  authorId  Int
+}

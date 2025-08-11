@@ -1,0 +1,13 @@
+model File {
+  id   Int    @id @default(autoincrement())
+  name String
+  size Int
+
+  md5sum    Int
+  sha1sum   Int
+  sha256sum Int
+  sha512sum Int
+
+  owner   User @relation(fields: [ownerId], references: [id])
+  ownerId Int
+}
