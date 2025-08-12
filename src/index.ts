@@ -70,32 +70,6 @@ const sshServer = new SshServer({
 sshServer.on("connection", (client, info) => {
   console.log(info);
 
-  client.on("openssh.streamlocal", (accept, reject, info) => {
-    console.log("conn openssh.streamlocal");
-    console.log(info);
-  });
-  client.on("tcpip", (accept, reject, info) => {
-    console.log("conn tcpip");
-    console.log(info);
-    accept();
-  });
-  client.on("rekey", () => console.log("conn rekey"));
-  client.on("request", (accept, reject, name, info) => {
-    console.log("conn request");
-    console.log(name);
-    console.log(info);
-    // @ts-ignore
-    accept();
-  });
-  client.on("greeting", (greeting) => {
-    console.log("conn greeting");
-    console.log(greeting);
-  });
-
-  client.on("handshake", (negotiated) => {
-    console.log("Client handshake");
-    console.log(negotiated);
-  });
   client.on("authentication", async (ctx) => {
     console.log("Client authentication");
 
@@ -122,13 +96,11 @@ sshServer.on("connection", (client, info) => {
 
     ctx.accept();
   });
-  client.on("ready", () => console.log("conn ready"));
   client.on("session", (accept, reject) => {
     console.log("conn session");
     const session = accept();
   });
 
-  client.on("end", () => console.log("Client disconnected"));
   client.on("close", () => console.log("Client closed"));
 
   client.on("error", (err) => {
