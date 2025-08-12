@@ -1,8 +1,9 @@
 model User {
   id          Int       @id @default(autoincrement())
+  displayName String
   name        String    @unique()
   description String
-  pubKeyHash  String
+  pubKeyHash  String    @unique()
   firstSeen   DateTime?
   lastSeen    DateTime?
 
