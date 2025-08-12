@@ -10,7 +10,7 @@ const ptyHandler = (session: Session, info: PseudoTtyInfo, logger: Logger) => {
 export default (session: Session, logger: Logger) => {
   logger.info("session create");
 
-  session.once("pty", (accept, _reject, info) => {
+  session.on("pty", (accept, _reject, info) => {
     accept();
     try {
       ptyHandler(session, info, logger);

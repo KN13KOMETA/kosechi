@@ -112,7 +112,7 @@ sshServer.on("connection", (client, info) => {
   client.on("ready", () => {
     clientLogger.info("client authentificated");
   });
-  client.once("session", (accept, _reject) =>
+  client.on("session", (accept, _reject) =>
     sessionHandler(accept(), sessionLogger),
   );
   client.on("error", (err) => clientLogger.info(err));
