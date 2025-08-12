@@ -1,49 +1,64 @@
-import { createHash } from "crypto";
+import { createHash, timingSafeEqual } from "crypto";
 import { readFileSync } from "fs";
 import path from "path";
 import { Server as SshServer, utils } from "ssh2";
 import { PrismaClient } from "./generated/prisma/client";
-import { System } from "./System";
+// import { System } from "./System";
 const { parseKey } = utils;
 
-const calcFingerprint = (publicKey: string, algo: string = "sha256") => {
+const checkValue = (input: Buffer, allowed: Buffer) => {
+  const autoReject = input.length !== allowed.length;
+  if (autoReject) {
+    // Prevent leaking length information by always making a comparison with the
+    // same input when lengths don't match what we expect ...
+    allowed = input;
+  }
+  const isMatch = timingSafeEqual(input, allowed);
+  return !autoReject && isMatch;
+};
+
+const calcHash = (publicKey: string, algo: string) => {
   const hash = createHash(algo).update(publicKey).digest("base64");
   return hash;
 };
 
+// Little oneliner to get public key hash
+// awk '{printf $2}' < cf-chat_ed25519.pub | openssl dgst -sha256 -binary | base64
+
 const prisma = new PrismaClient();
-const main = async () => { };
+const main = async () => {};
 
-{
-  System.initNew(prisma);
-}
+const serverKeyPath = path.join(__dirname, "../o/chatserver_ed25519");
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+const config = {
+  port: 13022,
+  hostname: "",
+  serverKey: {
+    content: readFileSync(serverKeyPath),
+    key: (() => {
+      const key = parseKey(readFileSync(serverKeyPath));
+      if (key instanceof Error) throw key;
+      return key;
+    })(),
+  },
+  pubKeyHashAlgo: "sha256",
+};
+
+// main()
+//   .then(async () => {
+//     await prisma.$disconnect();
+//   })
+//   .catch(async (e) => {
+//     console.error(e);
+//     await prisma.$disconnect();
+//     process.exit(1);
+//   });
 
 // awk '{printf "%s", $2}' < cf-chat_ed25519.pub | sha256sum
 
-const PORT = 13022;
-const hostname = "";
-const SERVER_KEY = readFileSync(
-  path.join(__dirname, "../o/chatserver_ed25519"),
-);
-
-const serverKey = parseKey(SERVER_KEY);
-
-if (serverKey instanceof Error) throw serverKey;
-
-// TODO: pqc algorithms
 // TODO: server options
 const sshServer = new SshServer({
-  hostKeys: [SERVER_KEY],
+  hostKeys: [config.serverKey.content],
   algorithms: {
     serverHostKey: ["ssh-ed25519"],
     kex: ["curve25519-sha256"],
@@ -81,29 +96,31 @@ sshServer.on("connection", (client, info) => {
     console.log("Client handshake");
     console.log(negotiated);
   });
-  client.on("authentication", (ctx) => {
+  client.on("authentication", async (ctx) => {
     console.log("Client authentication");
 
-    console.log(ctx.method);
+    if (ctx.method != "publickey") return ctx.reject(["publickey"]);
+    if (config.serverKey.key.type != ctx.key.algo) return ctx.reject();
 
-    if (ctx.method == "publickey") {
-      console.log("signature");
-      console.log(ctx.signature?.toString("hex"));
-      console.log("key data");
-      console.log(ctx.key.data.toString("base64"));
-      console.log("fingerprint");
-      console.log(calcFingerprint(ctx.key.data.toString("base64")));
-      console.log(
-        calcFingerprint(ctx.key.data.toString("base64"), "BLAKE2s256"),
-      );
-      console.log(ctx.key);
-      console.log(ctx.blob);
-      // @ts-ignore
-      console.log(calcFingerprint(ctx.blob));
-      if (ctx.blob) ctx.accept();
-    } else {
-      ctx.reject();
-    }
+    const pubKeyHash = createHash(config.pubKeyHashAlgo)
+      .update(ctx.key.data)
+      .digest("base64");
+    const user = await prisma.user.findUnique({
+      where: { pubKeyHash },
+      select: { id: true, pubKeyHash: true },
+    });
+    const pubKey = parseKey(ctx.key.data);
+
+    if (
+      !user ||
+      (ctx.signature &&
+        ctx.blob &&
+        (pubKey instanceof Error ||
+          !pubKey.verify(ctx.blob, ctx.signature, ctx.hashAlgo)))
+    )
+      return ctx.reject();
+
+    ctx.accept();
   });
   client.on("ready", () => console.log("conn ready"));
   client.on("session", (accept, reject) => {
@@ -120,7 +137,7 @@ sshServer.on("connection", (client, info) => {
   });
 });
 
-sshServer.listen(PORT, hostname, () => {
+sshServer.listen(config.port, config.hostname, () => {
   let addr = sshServer.address();
 
   if (addr == null) {
