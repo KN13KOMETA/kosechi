@@ -8,10 +8,12 @@
   },
   "scripts": {
     "p:studio": "npx prisma studio",
-    "p:generate": "npx prisma generate",
-    "start": "node dist/index.js",
+    "p:gen": "npx prisma generate",
+    "p:migratedev": "npx prisma migrate dev",
     "build": "npx tsc",
-    "dev": "npx ts-node src/index.ts"
+    "start": "node dist/index.js",
+    "dev": "npx ts-node src/index.ts",
+    "logs": "tail -f ./logs.pino | npx pino-pretty"
   },
   "keywords": [],
   "author": "KN13KOMETA",
@@ -26,11 +28,13 @@
   "homepage": "https://github.com/KN13KOMETA/kosechi#readme",
   "dependencies": {
     "@prisma/client": "^6.12.0",
+    "pino": "^9.8.0",
     "ssh2": "^1.16.0"
   },
   "devDependencies": {
     "@types/node": "^24.1.0",
     "@types/ssh2": "^1.15.5",
+    "pino-pretty": "^13.1.1",
     "prisma": "^6.12.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",

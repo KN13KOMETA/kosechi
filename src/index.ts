@@ -3,8 +3,18 @@ import { readFileSync } from "fs";
 import path from "path";
 import { Server as SshServer, utils } from "ssh2";
 import { PrismaClient } from "./generated/prisma/client";
+import pino from "pino";
 // import { System } from "./System";
 const { parseKey } = utils;
+
+const logger = pino(
+  pino.transport({
+    target: path.join(__dirname, "pinoTransport.ts"),
+    options: {
+      destination: path.join(__dirname, "../logs.pino"),
+    },
+  }),
+);
 
 const checkValue = (input: Buffer, allowed: Buffer) => {
   const autoReject = input.length !== allowed.length;
@@ -15,11 +25,6 @@ const checkValue = (input: Buffer, allowed: Buffer) => {
   }
   const isMatch = timingSafeEqual(input, allowed);
   return !autoReject && isMatch;
-};
-
-const calcHash = (publicKey: string, algo: string) => {
-  const hash = createHash(algo).update(publicKey).digest("base64");
-  return hash;
 };
 
 // Little oneliner to get public key hash
@@ -68,10 +73,13 @@ const sshServer = new SshServer({
 });
 
 sshServer.on("connection", (client, info) => {
-  console.log(info);
+  const clientLogger = logger.child({
+    ip: info.ip,
+  });
+  clientLogger.info("client connect");
 
   client.on("authentication", async (ctx) => {
-    console.log("Client authentication");
+    clientLogger.info("authentication");
 
     if (ctx.method != "publickey") return ctx.reject(["publickey"]);
     if (config.serverKey.key.type != ctx.key.algo) return ctx.reject();
@@ -97,16 +105,12 @@ sshServer.on("connection", (client, info) => {
     ctx.accept();
   });
   client.on("session", (accept, reject) => {
-    console.log("conn session");
+    clientLogger.info("session");
     const session = accept();
   });
 
-  client.on("close", () => console.log("Client closed"));
-
-  client.on("error", (err) => {
-    console.log("Client error");
-    console.log(err);
-  });
+  client.on("close", () => clientLogger.info("client disconnect"));
+  client.on("error", (err) => clientLogger.info(err));
 });
 
 sshServer.listen(config.port, config.hostname, () => {
@@ -118,5 +122,5 @@ sshServer.listen(config.port, config.hostname, () => {
     addr = `(${addr.family}) ${addr.address}:${addr.port}`;
   }
 
-  console.log(`Listening on ${addr}`);
+  logger.info(`listening on ${addr}`);
 });
