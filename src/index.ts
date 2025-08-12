@@ -4,6 +4,7 @@ import path from "path";
 import { Server as SshServer, utils } from "ssh2";
 import { PrismaClient } from "./generated/prisma/client";
 import pino from "pino";
+import sessionHandler from "./sessionHandler";
 // import { System } from "./System";
 const { parseKey } = utils;
 
@@ -76,6 +77,8 @@ sshServer.on("connection", (client, info) => {
   const clientLogger = logger.child({
     ip: info.ip,
   });
+  let sessionLogger: pino.Logger;
+
   clientLogger.info("client connect");
 
   client.on("authentication", async (ctx) => {
@@ -102,15 +105,18 @@ sshServer.on("connection", (client, info) => {
     )
       return ctx.reject();
 
+    sessionLogger = clientLogger.child({ id: user.id });
     ctx.accept();
   });
-  client.on("session", (accept, reject) => {
-    clientLogger.info("session");
-    const session = accept();
-  });
 
-  client.on("close", () => clientLogger.info("client disconnect"));
+  client.on("ready", () => {
+    clientLogger.info("client authentificated");
+  });
+  client.once("session", (accept, _reject) =>
+    sessionHandler(accept(), sessionLogger),
+  );
   client.on("error", (err) => clientLogger.info(err));
+  client.once("close", () => clientLogger.info("client disconnect"));
 });
 
 sshServer.listen(config.port, config.hostname, () => {
