@@ -10,7 +10,7 @@ const { parseKey } = utils;
 
 const logger = pino(
   pino.transport({
-    target: path.join(__dirname, "pinoTransport.ts"),
+    target: path.join(__dirname, "pinoTransport" + path.extname(__filename)),
     options: {
       destination: path.join(__dirname, "../logs.pino"),
     },
@@ -32,7 +32,7 @@ const checkValue = (input: Buffer, allowed: Buffer) => {
 // awk '{printf $2}' < cf-chat_ed25519.pub | openssl dgst -sha256 -binary | base64
 
 const prisma = new PrismaClient();
-const main = async () => {};
+const main = async () => { };
 
 const serverKeyPath = path.join(__dirname, "../o/chatserver_ed25519");
 
@@ -77,7 +77,7 @@ sshServer.on("connection", (client, info) => {
   const clientLogger = logger.child({
     ip: info.ip,
   });
-  let sessionLogger: pino.Logger;
+  let userId: number | null = null;
 
   clientLogger.info("client connect");
 
@@ -105,16 +105,21 @@ sshServer.on("connection", (client, info) => {
     )
       return ctx.reject();
 
-    sessionLogger = clientLogger.child({ id: user.id });
+    userId = user.id;
     ctx.accept();
   });
 
   client.on("ready", () => {
     clientLogger.info("client authentificated");
   });
-  client.on("session", (accept, _reject) =>
-    sessionHandler(accept(), sessionLogger),
-  );
+  client.on("session", (accept, reject) => {
+    if (userId == null) {
+      clientLogger.error("user is null");
+      clientLogger.error(info);
+      return reject();
+    }
+    sessionHandler(accept(), userId, clientLogger.child({ id: userId }));
+  });
   client.on("error", (err) => clientLogger.info(err));
   client.once("close", () => clientLogger.info("client disconnect"));
 });
