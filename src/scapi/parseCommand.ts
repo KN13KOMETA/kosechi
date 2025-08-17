@@ -1,6 +1,6 @@
 import { RouteType } from "./Router";
 
-interface Command {
+export interface Command {
   name: string;
   type: RouteType;
   path: string;
