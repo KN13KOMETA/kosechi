@@ -13,12 +13,12 @@ export type RouteCallback = (
 ) => {};
 
 export enum RouteType {
-  Router,
-  Middleware,
   Create,
   Read,
   Update,
   Delete,
+  Router,
+  Middleware,
 }
 
 export type RouteHandler = RouteCallback | Router;
