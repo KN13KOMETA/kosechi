@@ -11,7 +11,7 @@ export type RouteCallback = (
   req: RouteRequest,
   stream: ServerChannel,
   next: Function | undefined,
-) => {};
+) => void;
 
 export enum RouteType {
   Create,
