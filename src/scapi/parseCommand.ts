@@ -1,3 +1,4 @@
+import path from "path";
 import { RouteType } from "./Router";
 
 export interface Command {
@@ -10,7 +11,7 @@ export interface Command {
 export default (s: string): Command => {
   const args = s.trim().split(/\s+/);
   let buf: any;
-  let parse: Command = {
+  let cmd: Command = {
     name: "",
     type: RouteType.Read,
     path: "",
@@ -18,30 +19,30 @@ export default (s: string): Command => {
   };
 
   if ((buf = args.shift()) == null) throw "Command name is null";
-  parse.name = buf;
+  cmd.name = buf;
 
   switch ((buf = args.shift())) {
     case "create":
-      parse.type = RouteType.Create;
+      cmd.type = RouteType.Create;
       break;
     case "read":
-      parse.type = RouteType.Read;
+      cmd.type = RouteType.Read;
       break;
     case "update":
-      parse.type = RouteType.Update;
+      cmd.type = RouteType.Update;
       break;
     case "delete":
-      parse.type = RouteType.Delete;
+      cmd.type = RouteType.Delete;
       break;
     default:
       throw "Unknown command type";
   }
 
   if ((buf = args.shift()) == null) throw "Command path is null";
-  parse.path = buf;
+  cmd.path = path.normalize(buf);
 
   buf = args.join(" ");
-  parse.json = JSON.parse(buf);
+  cmd.json = JSON.parse(buf);
 
-  return parse;
+  return cmd;
 };
