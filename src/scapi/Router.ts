@@ -1,9 +1,10 @@
 import { match, MatchFunction } from "path-to-regexp";
 import { ServerChannel } from "ssh2";
+import parseCommand, { Command } from "./parseCommand";
 
 export interface RouteRequest {
-  options: string;
   data: object;
+  cmd: Command;
 }
 
 export type RouteCallback = (
