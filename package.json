@@ -13,7 +13,7 @@
     "build": "npx tsc",
     "start": "node dist/index.js",
     "dev": "npx ts-node src/index.ts",
-    "logs": "tail -f ./logs.pino | npx pino-pretty"
+    "logs": "find logs -type f -print0 | xargs -0 tail -f | npx pino-pretty"
   },
   "keywords": [],
   "author": "KN13KOMETA",
