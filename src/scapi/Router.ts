@@ -2,6 +2,7 @@ import { Match, match, MatchFunction } from "path-to-regexp";
 import { ServerChannel } from "ssh2";
 import parseCommand, { Command } from "./parseCommand";
 import path from "path";
+import pino from "pino";
 
 const isSubDir = (parent: string, dir: string) => {
   const relative = path.relative(parent, dir);
@@ -42,18 +43,35 @@ export interface Route {
 
 export class Router {
   #routes: Route[] = [];
+  #logger: pino.Logger;
 
-  constructor() {}
+  constructor(logger: pino.Logger) {
+    this.#logger = logger;
+  }
 
   inputRaw(exec: string, data: object = {}, stream: ServerChannel) {
-    // console.log(parseCommand(exec));
     this.input({ match: undefined, cmd: parseCommand(exec), data }, stream);
-    console.log("END\n");
   }
+
   input(req: RouteRequest, stream: ServerChannel) {
-    mainloop: for (const route of this.#routes) {
+    const logger = this.#logger.child({ req });
+
+    logger.info("new request");
+
+    reqloop: for (const route of this.#routes) {
+      const routeLogger = logger.child({ route });
       console.log(route.path);
       console.log(route.matcher(req.cmd.path));
+
+      if (
+        route.type != RouteType.Router &&
+        route.type != RouteType.Middleware &&
+        req.cmd.type != route.type
+      ) {
+        routeLogger.info("request and route type aren't same");
+        break reqloop;
+      }
+
       switch (route.type) {
         case RouteType.Router: {
           // if (typeof route.handler == "function")
@@ -69,10 +87,15 @@ export class Router {
           let next = false;
           if (route.path == "") {
             route.handler(req, stream, () => (next = true));
-            if (!next) break mainloop;
+            if (!next) break reqloop;
           } else if (isSubDir(route.path, req.cmd.path)) {
             route.handler(req, stream, () => (next = true));
-            if (!next) break mainloop;
+            if (!next) {
+              routeLogger.info("next is false, breaking");
+              break reqloop;
+            }
+            routeLogger.info("next is true, continue");
+            continue reqloop;
           }
           break;
         }
