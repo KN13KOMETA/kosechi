@@ -24,12 +24,18 @@ export default (session: Session, userId: number, logger: Logger) => {
 
   session.on("exec", (accept, reject, info) => {
     logger.info("session exec");
-    logger.info(info);
-    // exec api
+
+    const commandName = info.command.split(" ", 1)[0];
+
+    if (commandName == "api")
+      try {
+        api.inputRaw(info.command, {}, accept());
+      } catch (error) {
+        logger.error(error);
+      }
+
     reject();
   });
-
-  session.write("Lol");
 
   session.on("sftp", (accept, reject) => {
     reject();
