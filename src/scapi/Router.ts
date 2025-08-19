@@ -74,6 +74,7 @@ export class Router {
 
       switch (route.type) {
         case RouteType.Router: {
+          routeLogger.error("found router, skipping for now");
           // if (typeof route.handler == "function")
           //   throw "Something went wrong, expected Router";
           //
@@ -85,10 +86,7 @@ export class Router {
             throw "Something went wrong, expected MiddlewareCallback";
 
           let next = false;
-          if (route.path == "") {
-            route.handler(req, stream, () => (next = true));
-            if (!next) break reqloop;
-          } else if (isSubDir(route.path, req.cmd.path)) {
+          if (route.path == "" || isSubDir(route.path, req.cmd.path)) {
             route.handler(req, stream, () => (next = true));
             if (!next) {
               routeLogger.info("next is false, breaking");
