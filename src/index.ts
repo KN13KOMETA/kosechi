@@ -1,21 +1,15 @@
 import { createHash, timingSafeEqual } from "crypto";
-import { readFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync } from "fs";
 import path from "path";
 import { Server as SshServer, utils } from "ssh2";
 import { PrismaClient } from "./generated/prisma/client";
 import pino from "pino";
 import sessionHandler from "./sessionHandler";
+import createLogger from "./createLogger";
 // import { System } from "./System";
 const { parseKey } = utils;
 
-const logger = pino(
-  pino.transport({
-    target: path.join(__dirname, "pinoTransport" + path.extname(__filename)),
-    options: {
-      destination: path.join(__dirname, "../logs.pino"),
-    },
-  }),
-);
+const logger = createLogger("main.pino");
 
 const checkValue = (input: Buffer, allowed: Buffer) => {
   const autoReject = input.length !== allowed.length;
@@ -27,9 +21,6 @@ const checkValue = (input: Buffer, allowed: Buffer) => {
   const isMatch = timingSafeEqual(input, allowed);
   return !autoReject && isMatch;
 };
-
-// Little oneliner to get public key hash
-// awk '{printf $2}' < cf-chat_ed25519.pub | openssl dgst -sha256 -binary | base64
 
 const prisma = new PrismaClient();
 const main = async () => { };
