@@ -46,9 +46,9 @@ export interface Route {
 
 export class Router {
   #routes: Route[] = [];
-  #logger: pino.Logger;
+  #logger?: pino.Logger;
 
-  constructor(logger: pino.Logger) {
+  constructor(logger?: pino.Logger) {
     this.#logger = logger;
   }
 
@@ -57,12 +57,12 @@ export class Router {
   }
 
   input(req: RouteRequest, stream: ServerChannel) {
-    const logger = this.#logger.child({ req });
+    const logger = this.#logger?.child({ req });
 
-    logger.info("new request");
+    logger?.info("new request");
 
     reqloop: for (const route of this.#routes) {
-      const routeLogger = logger.child({ route });
+      const routeLogger = logger?.child({ route });
       console.log(route.path);
       console.log(route.matcher(req.cmd.path));
 
@@ -71,7 +71,7 @@ export class Router {
         route.type != RouteType.Middleware &&
         req.cmd.type != route.type
       ) {
-        routeLogger.info("request and route type aren't same, continue");
+        routeLogger?.info("request and route type aren't same, continue");
         continue reqloop;
       }
 
@@ -83,11 +83,11 @@ export class Router {
           const relative = relativeDir(route.path, req.cmd.path);
 
           if (!relative) {
-            routeLogger.info("isn't subdir of router, continue");
+            routeLogger?.info("isn't subdir of router, continue");
             continue reqloop;
           }
 
-          routeLogger.info("subdir of router, redirecting request");
+          routeLogger?.info("subdir of router, redirecting request");
           req.cmd.path = relative;
           route.handler.input(req, stream);
           break reqloop;
@@ -100,10 +100,10 @@ export class Router {
           if (route.path == "" || relativeDir(route.path, req.cmd.path)) {
             route.handler(req, stream, () => (next = true));
             if (!next) {
-              routeLogger.info("next is false, breaking");
+              routeLogger?.info("next is false, breaking");
               break reqloop;
             }
-            routeLogger.info("next is true, continue");
+            routeLogger?.info("next is true, continue");
             continue reqloop;
           }
           break;
@@ -116,11 +116,11 @@ export class Router {
           req.match = route.matcher(req.cmd.path);
 
           if (!req.match) {
-            routeLogger.info("request doesn't match, continue");
+            routeLogger?.info("request doesn't match, continue");
             continue reqloop;
           }
 
-          routeLogger.info("request matches, run handler");
+          routeLogger?.info("request matches, run handler");
           route.handler(req, stream, () => { });
           break reqloop;
         }
