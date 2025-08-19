@@ -68,8 +68,8 @@ export class Router {
         route.type != RouteType.Middleware &&
         req.cmd.type != route.type
       ) {
-        routeLogger.info("request and route type aren't same");
-        break reqloop;
+        routeLogger.info("request and route type aren't same, continue");
+        continue reqloop;
       }
 
       switch (route.type) {
