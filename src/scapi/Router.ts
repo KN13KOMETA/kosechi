@@ -97,7 +97,21 @@ export class Router {
           }
           break;
         }
+        // Handle CRUD requests
         default: {
+          if (typeof route.handler != "function")
+            throw "Something went wrong, expected RouteCallback";
+
+          req.match = route.matcher(req.cmd.path);
+
+          if (!req.match) {
+            routeLogger.info("request doesn't match, continue");
+            continue reqloop;
+          }
+
+          routeLogger.info("request matches, run handler");
+          route.handler(req, stream, () => { });
+          break reqloop;
         }
       }
     }
