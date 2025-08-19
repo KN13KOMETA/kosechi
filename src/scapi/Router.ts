@@ -1,8 +1,8 @@
+import path from "path";
 import { Match, match, MatchFunction } from "path-to-regexp";
+import pino from "pino";
 import { ServerChannel } from "ssh2";
 import parseCommand, { Command } from "./parseCommand";
-import path from "path";
-import pino from "pino";
 
 const relativeDir = (parent: string, dir: string) => {
   const relative = path.relative(parent, dir);

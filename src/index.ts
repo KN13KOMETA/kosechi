@@ -1,12 +1,10 @@
 import { createHash, timingSafeEqual } from "crypto";
-import { existsSync, mkdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import path from "path";
 import { Server as SshServer, utils } from "ssh2";
-import { PrismaClient } from "./generated/prisma/client";
-import pino from "pino";
-import sessionHandler from "./sessionHandler";
 import createLogger from "./createLogger";
-// import { System } from "./System";
+import { PrismaClient } from "./generated/prisma/client";
+import sessionHandler from "./sessionHandler";
 const { parseKey } = utils;
 
 const logger = createLogger("main.pino");

@@ -1,5 +1,7 @@
-import { Logger } from "pino";
+import path from "path";
+import pino, { Logger } from "pino";
 import { PseudoTtyInfo, Session } from "ssh2";
+import api from "./api";
 
 const ptyHandler = (session: Session, info: PseudoTtyInfo, logger: Logger) => {
   logger.info("pty create");
