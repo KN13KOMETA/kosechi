@@ -77,19 +77,27 @@ export class Router {
 
       switch (route.type) {
         case RouteType.Router: {
-          routeLogger.error("found router, skipping for now");
-          // if (typeof route.handler == "function")
-          //   throw "Something went wrong, expected Router";
-          //
-          // route.handler.input(req);
-          break;
+          if (typeof route.handler == "function")
+            throw "Something went wrong, expected Router";
+
+          const relative = relativeDir(route.path, req.cmd.path);
+
+          if (!relative) {
+            routeLogger.info("isn't subdir of router, continue");
+            continue reqloop;
+          }
+
+          routeLogger.info("subdir of router, redirecting request");
+          req.cmd.path = relative;
+          route.handler.input(req, stream);
+          break reqloop;
         }
         case RouteType.Middleware: {
           if (typeof route.handler != "function")
             throw "Something went wrong, expected MiddlewareCallback";
 
           let next = false;
-          if (route.path == "" || isSubDir(route.path, req.cmd.path)) {
+          if (route.path == "" || relativeDir(route.path, req.cmd.path)) {
             route.handler(req, stream, () => (next = true));
             if (!next) {
               routeLogger.info("next is false, breaking");
