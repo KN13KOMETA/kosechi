@@ -63,8 +63,6 @@ export class Router {
 
     reqloop: for (const route of this.#routes) {
       const routeLogger = logger?.child({ route });
-      console.log(route.path);
-      console.log(route.matcher(req.cmd.path));
 
       if (
         route.type != RouteType.Router &&
