@@ -4,9 +4,12 @@ import parseCommand, { Command } from "./parseCommand";
 import path from "path";
 import pino from "pino";
 
-const isSubDir = (parent: string, dir: string) => {
+const relativeDir = (parent: string, dir: string) => {
   const relative = path.relative(parent, dir);
-  return relative && !relative.startsWith("..") && !path.isAbsolute(relative);
+  return relative == "" ||
+    (!relative.startsWith("..") && !path.isAbsolute(relative))
+    ? "/" + relative
+    : false;
 };
 
 export interface RouteRequest {
