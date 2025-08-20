@@ -35,7 +35,7 @@ export default (
 
     if (commandName == "api")
       try {
-        api.inputRaw(info.command, {}, accept());
+        api.inputRaw(info.command, { userId }, accept());
       } catch (error) {
         logger.error(error);
       }
