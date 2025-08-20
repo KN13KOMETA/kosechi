@@ -12,8 +12,8 @@
     "p:migratedev": "npx prisma migrate dev",
     "build": "npx tsc",
     "start": "node dist/index.js",
-    "logs": "find logs -type f -print0 | xargs -0 tail -f | npx pino-pretty"
     "dev": "npx tsx src/index.ts",
+    "logs": "find logs -type f -print0 | xargs -0 tail -f | npx pino-pretty"
   },
   "keywords": [],
   "author": "KN13KOMETA",
