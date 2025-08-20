@@ -1,6 +1,12 @@
 import createLogger from "../../createLogger";
 import { Router } from "../../scapi";
 
-const apiv1 = new Router(createLogger("api/v1.pino"));
+const v1 = new Router(createLogger("api/v1.pino"));
 
-export default apiv1;
+v1.read("/users/:userId", (req, stream) => {
+  stream.write("User Id: " + req.params.userId);
+  stream.exit(0);
+  stream.end();
+});
+
+export default v1;

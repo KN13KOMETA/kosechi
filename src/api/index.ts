@@ -1,6 +1,6 @@
 import { Router } from "../scapi";
 import createLogger from "../createLogger";
-import apiv1 from "./v1";
+import v1 from "./v1";
 
 const logger = createLogger("api/main.pino");
 
@@ -15,6 +15,6 @@ api.read("/welcome", (req, stream) => {
   stream.end();
 });
 
-api.use("/v1", apiv1);
+api.use("/v1", v1);
 
 export default root;
