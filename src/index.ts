@@ -39,18 +39,6 @@ const config = {
   pubKeyHashAlgo: "sha256",
 };
 
-// main()
-//   .then(async () => {
-//     await prisma.$disconnect();
-//   })
-//   .catch(async (e) => {
-//     console.error(e);
-//     await prisma.$disconnect();
-//     process.exit(1);
-//   });
-
-// awk '{printf "%s", $2}' < cf-chat_ed25519.pub | sha256sum
-
 // TODO: server options
 const sshServer = new SshServer({
   hostKeys: [config.serverKey.content],
