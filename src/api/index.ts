@@ -2,6 +2,24 @@ import { Router } from "../scapi";
 import createLogger from "../createLogger";
 import v1 from "./v1";
 import { PrismaClient } from "../generated/prisma/client";
+import packageJson from "../../package.json";
+
+type ApiStatus = {
+  [key: string]: "discontinued" | "deprecated" | "available";
+};
+
+const apiStatus: ApiStatus = {
+  v1: "available",
+};
+
+const welcomeMessage = JSON.stringify({
+  name: packageJson.name,
+  version: packageJson.version,
+  description: packageJson.description,
+  author: packageJson.author,
+  /** @type {[key: string]: "asd"} */
+  api: apiStatus,
+});
 
 export default (prisma: PrismaClient): Router => {
   const logger = createLogger("api/main.pino");
@@ -11,8 +29,9 @@ export default (prisma: PrismaClient): Router => {
 
   root.use("/api", api);
 
-  api.read("/welcome", (req, stream) => {
-    stream.write("Welcome to kosechi");
+  api.read("/welcome", (_req, stream) => {
+    stream.write(welcomeMessage);
+
     stream.exit(0);
     stream.end();
   });
