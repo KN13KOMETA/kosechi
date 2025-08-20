@@ -1,10 +1,10 @@
 import { existsSync, mkdirSync } from "fs";
 import path from "path";
-import pino from "pino";
+import pino, { Logger } from "pino";
 
 const logsDir = path.join(__dirname, "../logs");
 
-export default (p: string): pino.Logger => {
+export default (p: string): Logger => {
   const filePath = path.join(logsDir, p);
   const dirPath = path.join(filePath, "..");
 
