@@ -5,6 +5,7 @@ import { Server as SshServer, utils } from "ssh2";
 import createLogger from "./createLogger";
 import { PrismaClient } from "./generated/prisma/client";
 import sessionHandler from "./sessionHandler";
+import initApi from "./api";
 const { parseKey } = utils;
 
 const logger = createLogger("main.pino");
@@ -21,7 +22,7 @@ const checkValue = (input: Buffer, allowed: Buffer) => {
 };
 
 const prisma = new PrismaClient();
-const main = async () => { };
+const api = initApi(prisma);
 
 const serverKeyPath = path.join(__dirname, "../o/chatserver_ed25519");
 
@@ -95,7 +96,7 @@ sshServer.on("connection", (client, info) => {
       clientLogger.error(info);
       return reject();
     }
-    sessionHandler(accept(), userId, clientLogger.child({ id: userId }));
+    sessionHandler(accept(), api, userId, clientLogger.child({ id: userId }));
   });
   client.on("error", (err) => clientLogger.info(err));
   client.once("close", () => clientLogger.info("client disconnect"));

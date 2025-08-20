@@ -1,12 +1,16 @@
+import pino from "pino";
 import createLogger from "../../createLogger";
+import { PrismaClient } from "../../generated/prisma/client";
 import { Router } from "../../scapi";
 
-const v1 = new Router(createLogger("api/v1.pino"));
+export default (prisma: PrismaClient, logger?: pino.Logger): Router => {
+  const v1 = new Router(logger);
 
-v1.read("/users/:userId", (req, stream) => {
-  stream.write("User Id: " + req.params.userId);
-  stream.exit(0);
-  stream.end();
-});
+  v1.read("/users/:userId", (req, stream) => {
+    stream.write("User Id: " + req.params.userId);
+    stream.exit(0);
+    stream.end();
+  });
 
-export default v1;
+  return v1;
+};

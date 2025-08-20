@@ -1,7 +1,8 @@
 import path from "path";
 import pino, { Logger } from "pino";
 import { PseudoTtyInfo, Session } from "ssh2";
-import api from "./api";
+import { PrismaClient } from "./generated/prisma/client";
+import { Router } from "./scapi";
 
 const ptyHandler = (session: Session, info: PseudoTtyInfo, logger: Logger) => {
   logger.info("pty create");
@@ -9,7 +10,12 @@ const ptyHandler = (session: Session, info: PseudoTtyInfo, logger: Logger) => {
   // shell
 };
 
-export default (session: Session, userId: number, logger: Logger) => {
+export default (
+  session: Session,
+  api: Router,
+  userId: number,
+  logger: Logger,
+) => {
   logger.info("session create");
 
   // TODO: Add interactive session later
