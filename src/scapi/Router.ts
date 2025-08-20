@@ -1,5 +1,11 @@
 import path from "path";
-import { Match, match, MatchFunction } from "path-to-regexp";
+import {
+  Match,
+  match,
+  MatchFunction,
+  MatchResult,
+  ParamData,
+} from "path-to-regexp";
 import pino from "pino";
 import { ServerChannel } from "ssh2";
 import parseCommand, { Command } from "./parseCommand";
@@ -12,8 +18,8 @@ const relativeDir = (parent: string, dir: string) => {
     : false;
 };
 
-export interface RouteRequest {
-  match: Match<object> | undefined;
+export interface RouteRequest<Params = false> {
+  params: Params;
   data: object;
   cmd: Command;
 }
@@ -24,7 +30,10 @@ export type MiddlewareCallback = (
   next: () => void,
 ) => void;
 
-export type RouteCallback = (req: RouteRequest, stream: ServerChannel) => void;
+export type RouteCallback = (
+  req: RouteRequest<ParamData>,
+  stream: ServerChannel,
+) => void;
 
 export enum RouteType {
   Create,
@@ -53,10 +62,10 @@ export class Router {
   }
 
   inputRaw(exec: string, data: object = {}, stream: ServerChannel) {
-    this.input({ match: undefined, cmd: parseCommand(exec), data }, stream);
+    this.input({ params: false, cmd: parseCommand(exec), data }, stream);
   }
 
-  input(req: RouteRequest, stream: ServerChannel) {
+  input(req: RouteRequest<any>, stream: ServerChannel) {
     const logger = this.#logger?.child({ req });
 
     logger?.info("new request");
@@ -111,13 +120,14 @@ export class Router {
           if (typeof route.handler != "function")
             throw "Something went wrong, expected RouteCallback";
 
-          req.match = route.matcher(req.cmd.path);
+          const match = route.matcher(req.cmd.path);
 
-          if (!req.match) {
+          if (!match) {
             routeLogger?.info("request doesn't match, continue");
             continue reqloop;
           }
 
+          req.params = match.params;
           routeLogger?.info("request matches, run handler");
           route.handler(req, stream, () => { });
           break reqloop;
