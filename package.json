@@ -10,7 +10,6 @@
     "p:studio": "npx prisma studio",
     "p:gen": "npx prisma generate",
     "p:migratedev": "npx prisma migrate dev",
-    "install": "npm ci",
     "build": "npx tsc",
     "start": "node dist/index.js",
     "dev": "npx tsx src/index.ts",
