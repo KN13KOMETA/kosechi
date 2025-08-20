@@ -134,6 +134,8 @@ export class Router {
         }
       }
     }
+
+    stream.end();
   }
 
   #addRoute(type: RouteType, path: string, handler: RouteHandler) {
