@@ -10,7 +10,7 @@
     "p:studio": "npx prisma studio",
     "p:gen": "npx prisma generate",
     "p:migratedev": "npx prisma migrate dev",
-    "build": "npx tsc",
+    "build": "npm run p:gen && npx tsc",
     "start": "node dist/index.js",
     "dev": "npx tsx src/index.ts",
     "logs": "find logs -type f -print0 | xargs -0 tail -f | npx pino-pretty"
