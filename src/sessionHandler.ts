@@ -39,8 +39,9 @@ export default (
         api.inputRaw(info.command, { userId }, stream);
       } catch (error) {
         logger.error(error);
-        if (typeof error == "string" || error instanceof Error)
+        if (typeof error == "string" || error instanceof Error) {
           stream.write(error.toString());
+        }
         stream.exit(1);
         stream.end();
       }
