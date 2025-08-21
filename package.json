@@ -13,7 +13,8 @@
     "build": "npm run p:gen && npx tsc",
     "start": "node dist/index.js",
     "dev": "npx tsx src/index.ts",
-    "logs": "find logs -type f -print0 | xargs -0 tail -f"
+    "logs": "find logs -type f -print0 | xargs -0 tail -f",
+    "logs:jq": "find logs -type f -print0 | xargs -0 tail -f | awk -f jq.awk"
   },
   "keywords": [],
   "author": "KN13KOMETA",
