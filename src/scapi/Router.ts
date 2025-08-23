@@ -65,7 +65,7 @@ export class Router {
     this.input({ params: false, cmd: parseCommand(exec), data }, stream);
   }
 
-  input(req: RouteRequest<any>, stream: ServerChannel) {
+  input(req: RouteRequest<any>, stream: ServerChannel): boolean {
     const logger = this.#logger?.child({ req });
 
     logger?.info("new request");
@@ -96,8 +96,11 @@ export class Router {
 
           routeLogger?.info("subdir of router, redirecting request");
           req.cmd.path = relative;
-          route.handler.input(req, stream);
-          break reqloop;
+          if (route.handler.input(req, stream)) return true;
+          else {
+            routeLogger?.info("didn't got response from router, continue");
+            continue reqloop;
+          }
         }
         case RouteType.Middleware: {
           if (typeof route.handler != "function")
@@ -108,7 +111,7 @@ export class Router {
             route.handler(req, stream, () => (next = true));
             if (!next) {
               routeLogger?.info("next is false, breaking");
-              break reqloop;
+              return true;
             }
             routeLogger?.info("next is true, continue");
             continue reqloop;
@@ -130,12 +133,12 @@ export class Router {
           req.params = match.params;
           routeLogger?.info("request matches, run handler");
           route.handler(req, stream, () => { });
-          break reqloop;
+          return true;
         }
       }
     }
 
-    stream.end();
+    return false;
   }
 
   #addRoute(type: RouteType, path: string, handler: RouteHandler) {
