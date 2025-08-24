@@ -32,3 +32,42 @@ export enum StatusCode {
   PermanentRedirect = 138,
 }
 
+export type StatusData<T extends StatusCode> = T extends
+  | StatusCode.BadRequest
+  | StatusCode.Unauthorized
+  | StatusCode.NotFound
+  | StatusCode.RequestTimeout
+  | StatusCode.Gone
+  | StatusCode.ImATeapot
+  ? { message: string; data: any }
+  : T extends StatusCode.Forbidden
+  ? { message: string; allowed: string[] }
+  : T extends StatusCode.RequestEntityTooLarge
+  ? { message: string; maxSize: number }
+  : T extends StatusCode.TooManyRequests
+  ? { message: string; allowedCount: number; timeoutExpire: number }
+  : T extends StatusCode.UnavailableForLegalReasons
+  ? { message: string; allowed: string[]; rejected: string[] }
+  : T extends StatusCode.MultipleChoices
+  ? { message: string; field: { name: string; values: string[] } }
+  : T extends StatusCode.NotModified
+  ? { message: string; expires: number }
+  : T extends
+  | StatusCode.TemporaryRedirect
+  | StatusCode.PermanentRedirect
+  ? { message: string; path: string }
+  : never;
+
+export class ResponseStatus<T extends StatusCode> {
+  code: T;
+  data: StatusData<T>;
+
+  constructor(statusCode: T, data: StatusData<T>) {
+    this.code = statusCode;
+    this.data = data;
+  }
+
+  toString(): string {
+    return JSON.stringify(this.data);
+  }
+}
