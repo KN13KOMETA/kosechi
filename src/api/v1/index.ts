@@ -25,6 +25,18 @@ const validatePositiveNumber = (
 export default (prisma: PrismaClient, logger?: pino.Logger): Router => {
   const v1 = new Router(logger);
 
+  v1.use((req, stream, next) => {
+    if (typeof req.data.userId == "number") return next();
+
+    const res = new ErrorResponse(ResponseCode.ImATeapot, {
+      message: "Internal Server Error: userId doesn't exists",
+      data: null,
+    });
+    stream.write(res.toString());
+    stream.exit(res.code);
+    stream.end();
+  });
+
   v1.read("/users/:userId", async (req, stream) => {
     const id = Number(req.params.userId);
     if (!validatePositiveNumber("userId", id, stream)) return;
