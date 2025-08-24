@@ -1,5 +1,4 @@
 import pino from "pino";
-import createLogger from "../../createLogger";
 import { PrismaClient } from "../../generated/prisma/client";
 import { Router } from "../../scapi";
 

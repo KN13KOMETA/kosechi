@@ -1,9 +1,9 @@
-import { Router } from "../scapi";
-import createLogger from "../createLogger";
-import v1 from "./v1";
-import { PrismaClient } from "../generated/prisma/client";
 import packageJson from "../../package.json";
+import createLogger from "../createLogger";
+import { PrismaClient } from "../generated/prisma/client";
+import { Router } from "../scapi";
 import ErrorResponse, { ResponseCode } from "./ErrorResponse";
+import v1 from "./v1";
 
 type ApiStatus = {
   [key: string]: "discontinued" | "deprecated" | "available";
@@ -18,7 +18,6 @@ const welcomeMessage = JSON.stringify({
   version: packageJson.version,
   description: packageJson.description,
   author: packageJson.author,
-  /** @type {[key: string]: "asd"} */
   api: apiStatus,
 });
 
@@ -39,7 +38,7 @@ export default (prisma: PrismaClient): Router => {
 
   api.use("/v1", v1(prisma, createLogger("api/v1.pino")));
 
-  root.use((_req, stream, next) => {
+  root.use((_req, stream, _next) => {
     const res = new ErrorResponse(ResponseCode.NotFound, {
       message: "",
       data: null,
