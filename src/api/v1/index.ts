@@ -4,12 +4,13 @@ import { Router } from "../../scapi";
 import ErrorResponse, { ResponseCode } from "../ErrorResponse";
 import { ServerChannel } from "ssh2";
 
+const checkPositiveNumber = (x: any) => Number.isSafeInteger(x) && x >= 0;
 const validatePositiveNumber = (
   name: string,
   x: any,
   stream: ServerChannel,
 ) => {
-  if (Number.isSafeInteger(x) && x >= 0) return true;
+  if (checkPositiveNumber(x)) return true;
 
   const res = new ErrorResponse(ResponseCode.BadRequest, {
     message: name + " must positive number",
