@@ -47,20 +47,32 @@ export default (prisma: PrismaClient, logger?: pino.Logger): Router => {
       count = 50;
     }
 
-    const users = await prisma.user.findMany({
-      where: {
-        id: {
-          gte: startId,
+    try {
+      const users = await prisma.user.findMany({
+        where: {
+          id: {
+            gte: startId,
+          },
         },
-      },
-      orderBy: {
-        id: "asc",
-      },
-      take: count,
-    });
+        select: req.cmd.json.select,
+        orderBy: {
+          id: "asc",
+        },
+        take: count,
+      });
 
-    stream.write(JSON.stringify(users));
-    stream.exit(0);
+      stream.write(JSON.stringify(users));
+      stream.exit(0);
+    } catch (err) {
+      const res = new ErrorResponse(ResponseCode.BadRequest, {
+        message: "Bad Select",
+        data: null,
+      });
+
+      stream.write(res.toString());
+      stream.exit(res.code);
+    }
+
     stream.end();
   });
 
