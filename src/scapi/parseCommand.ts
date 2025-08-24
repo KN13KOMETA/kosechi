@@ -5,7 +5,7 @@ export interface Command {
   name: string;
   type: RouteType;
   path: string;
-  json: object;
+  json: any;
 }
 
 export default (s: string): Command => {
