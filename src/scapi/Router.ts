@@ -20,7 +20,7 @@ const relativeDir = (parent: string, dir: string) => {
 
 export interface RouteRequest<Params = false> {
   params: Params;
-  data: object;
+  data: any;
   cmd: Command;
 }
 
