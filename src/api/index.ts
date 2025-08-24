@@ -3,6 +3,7 @@ import createLogger from "../createLogger";
 import v1 from "./v1";
 import { PrismaClient } from "../generated/prisma/client";
 import packageJson from "../../package.json";
+import ErrorResponse, { ResponseCode } from "./ErrorResponse";
 
 type ApiStatus = {
   [key: string]: "discontinued" | "deprecated" | "available";
@@ -37,6 +38,17 @@ export default (prisma: PrismaClient): Router => {
   });
 
   api.use("/v1", v1(prisma, createLogger("api/v1.pino")));
+
+  root.use((_req, stream, next) => {
+    const res = new ErrorResponse(ResponseCode.NotFound, {
+      message: "",
+      data: null,
+    });
+
+    stream.write(res.toString());
+    stream.exit(res.code);
+    stream.end();
+  });
 
   return root;
 };
