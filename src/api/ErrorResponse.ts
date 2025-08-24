@@ -1,4 +1,4 @@
-export enum StatusCode {
+export enum ResponseCode {
   // CLIENT ERROR
   /** Server doesn't understand request, it should be modified */
   BadRequest = 140,
@@ -32,39 +32,39 @@ export enum StatusCode {
   PermanentRedirect = 138,
 }
 
-export type StatusData<T extends StatusCode> = T extends
-  | StatusCode.BadRequest
-  | StatusCode.Unauthorized
-  | StatusCode.NotFound
-  | StatusCode.RequestTimeout
-  | StatusCode.Gone
-  | StatusCode.ImATeapot
+export type ResponseData<T extends ResponseCode> = T extends
+  | ResponseCode.BadRequest
+  | ResponseCode.Unauthorized
+  | ResponseCode.NotFound
+  | ResponseCode.RequestTimeout
+  | ResponseCode.Gone
+  | ResponseCode.ImATeapot
   ? { message: string; data: any }
-  : T extends StatusCode.Forbidden
+  : T extends ResponseCode.Forbidden
   ? { message: string; allowed: string[] }
-  : T extends StatusCode.RequestEntityTooLarge
+  : T extends ResponseCode.RequestEntityTooLarge
   ? { message: string; maxSize: number }
-  : T extends StatusCode.TooManyRequests
+  : T extends ResponseCode.TooManyRequests
   ? { message: string; allowedCount: number; timeoutExpire: number }
-  : T extends StatusCode.UnavailableForLegalReasons
+  : T extends ResponseCode.UnavailableForLegalReasons
   ? { message: string; allowed: string[]; rejected: string[] }
-  : T extends StatusCode.MultipleChoices
+  : T extends ResponseCode.MultipleChoices
   ? { message: string; field: { name: string; values: string[] } }
-  : T extends StatusCode.NotModified
+  : T extends ResponseCode.NotModified
   ? { message: string; expires: number }
   : T extends
-  | StatusCode.TemporaryRedirect
-  | StatusCode.PermanentRedirect
+  | ResponseCode.TemporaryRedirect
+  | ResponseCode.PermanentRedirect
   ? { message: string; path: string }
   : never;
 
-export class ResponseStatus<T extends StatusCode> {
+export default class ErrorResponse<T extends ResponseCode> {
   code: T;
-  data: StatusData<T>;
+  data: ResponseData<T>;
 
-  constructor(statusCode: T, data: StatusData<T>) {
-    this.code = statusCode;
-    this.data = data;
+  constructor(resCode: T, resData: ResponseData<T>) {
+    this.code = resCode;
+    this.data = resData;
   }
 
   toString(): string {
