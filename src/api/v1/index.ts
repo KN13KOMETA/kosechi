@@ -38,6 +38,32 @@ export default (prisma: PrismaClient, logger?: pino.Logger): Router => {
     stream.end();
   });
 
+  v1.read("/users", async (req, stream) => {
+    let startId = Number(req.cmd.json.startId);
+    let count = Number(req.cmd.json.count);
+
+    if (!checkPositiveNumber(startId) || !checkPositiveNumber(count)) {
+      startId = 0;
+      count = 50;
+    }
+
+    const users = await prisma.user.findMany({
+      where: {
+        id: {
+          gte: startId,
+        },
+      },
+      orderBy: {
+        id: "asc",
+      },
+      take: count,
+    });
+
+    stream.write(JSON.stringify(users));
+    stream.exit(0);
+    stream.end();
+  });
+
   v1.read("/users/:userId", async (req, stream) => {
     const id = Number(req.params.userId);
     if (!validatePositiveNumber("userId", id, stream)) return;
