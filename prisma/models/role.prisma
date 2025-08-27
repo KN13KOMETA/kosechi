@@ -3,8 +3,8 @@ model Role {
   name  String
   color Int
 
-  order      Int
-  permisions Int
+  order       Int
+  permissions Int
 
   channels Channel[]
   users    User[]
