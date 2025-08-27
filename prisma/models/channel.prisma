@@ -10,6 +10,11 @@ model Channel {
   roles    Role[]
   users    User[]    @relation("AccesedChannels")
   messages Message[]
+
+  // Categoty related
+  channels   Channel[] @relation("ParentCategory")
+  category   Channel?  @relation("ParentCategory", fields: [categoryId], references: [id])
+  categoryId Int?
 }
 
 enum ChannelType {
