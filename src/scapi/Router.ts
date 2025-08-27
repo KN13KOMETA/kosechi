@@ -28,7 +28,7 @@ export type MiddlewareCallback = (
   req: RouteRequest,
   stream: ServerChannel,
   next: () => void,
-) => void;
+) => Promise<void>;
 
 export type RouteCallback = (
   req: RouteRequest<ParamData>,
@@ -65,7 +65,7 @@ export class Router {
     this.input({ params: false, cmd: parseCommand(exec), data }, stream);
   }
 
-  input(req: RouteRequest<any>, stream: ServerChannel): boolean {
+  async input(req: RouteRequest<any>, stream: ServerChannel): Promise<boolean> {
     const logger = this.#logger?.child({ req });
 
     logger?.info("new request");
@@ -96,7 +96,7 @@ export class Router {
 
           routeLogger?.info("subdir of router, redirecting request");
           req.cmd.path = relative;
-          if (route.handler.input(req, stream)) return true;
+          if (await route.handler.input(req, stream)) return true;
           else {
             routeLogger?.info("didn't got response from router, continue");
             continue reqloop;
@@ -108,7 +108,7 @@ export class Router {
 
           let next = false;
           if (route.path == "" || relativeDir(route.path, req.cmd.path)) {
-            route.handler(req, stream, () => (next = true));
+            await route.handler(req, stream, () => (next = true));
             if (!next) {
               routeLogger?.info("next is false, breaking");
               return true;
@@ -132,7 +132,7 @@ export class Router {
 
           req.params = match.params;
           routeLogger?.info("request matches, run handler");
-          route.handler(req, stream, () => { });
+          route.handler(req, stream, () => {});
           return true;
         }
       }
