@@ -1,7 +1,7 @@
 {
-  "name": "kosechi",
+  "name": "KOSeCHi",
   "version": "2.0.0-beta",
-  "description": "KOMETA SSH chat",
+  "description": "KOMETA SSH CHAT",
   "main": "src/index.ts",
   "prisma": {
     "schema": "./prisma"
