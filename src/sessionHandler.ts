@@ -1,7 +1,5 @@
-import path from "path";
-import pino, { Logger } from "pino";
+import { Logger } from "pino";
 import { PseudoTtyInfo, Session } from "ssh2";
-import { PrismaClient } from "./generated/prisma/client";
 import { Router } from "./scapi";
 
 const ptyHandler = (session: Session, info: PseudoTtyInfo, logger: Logger) => {

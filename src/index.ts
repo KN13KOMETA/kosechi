@@ -9,18 +9,6 @@ import initApi from "./api";
 const { parseKey } = utils;
 
 const logger = createLogger("main.pino");
-
-const checkValue = (input: Buffer, allowed: Buffer) => {
-  const autoReject = input.length !== allowed.length;
-  if (autoReject) {
-    // Prevent leaking length information by always making a comparison with the
-    // same input when lengths don't match what we expect ...
-    allowed = input;
-  }
-  const isMatch = timingSafeEqual(input, allowed);
-  return !autoReject && isMatch;
-};
-
 const prisma = new PrismaClient();
 const api = initApi(prisma);
 

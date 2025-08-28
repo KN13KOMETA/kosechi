@@ -8,6 +8,7 @@ export interface Command {
   json: any;
 }
 
+// TODO: throw Errors instead of string
 export default (s: string): Command => {
   const args = s.trim().split(/\s+/);
   let buf: any;

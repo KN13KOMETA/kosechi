@@ -1,12 +1,6 @@
 import path from "path";
-import {
-  Match,
-  match,
-  MatchFunction,
-  MatchResult,
-  ParamData,
-} from "path-to-regexp";
-import pino from "pino";
+import { match, MatchFunction, ParamData } from "path-to-regexp";
+import { Logger } from "pino";
 import { ServerChannel } from "ssh2";
 import parseCommand, { Command } from "./parseCommand";
 
@@ -28,7 +22,7 @@ export type MiddlewareCallback = (
   req: RouteRequest,
   stream: ServerChannel,
   next: () => void,
-) => Promise<void>;
+) => Promise<void> | void;
 
 export type RouteCallback = (
   req: RouteRequest<ParamData>,
@@ -55,9 +49,9 @@ export interface Route {
 
 export class Router {
   #routes: Route[] = [];
-  #logger?: pino.Logger;
+  #logger?: Logger;
 
-  constructor(logger?: pino.Logger) {
+  constructor(logger?: Logger) {
     this.#logger = logger;
   }
 

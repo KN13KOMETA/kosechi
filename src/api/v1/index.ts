@@ -1,10 +1,10 @@
-import pino from "pino";
-import { Prisma, PrismaClient } from "../../generated/prisma/client";
-import { Command, Router, RouteRequest } from "../../scapi";
-import ErrorResponse, { ResponseCode } from "../ErrorResponse";
-import { ServerChannel } from "ssh2";
-import UserPermissions from "../UserPermissions";
 import { ParamData } from "path-to-regexp";
+import { Logger } from "pino";
+import { ServerChannel } from "ssh2";
+import { Prisma, PrismaClient } from "../../generated/prisma/client";
+import { Command, Router } from "../../scapi";
+import ErrorResponse, { ResponseCode } from "../ErrorResponse";
+import UserPermissions from "../UserPermissions";
 
 const checkPositiveNumber = (x: any) => Number.isSafeInteger(x) && x >= 0;
 const validatePositiveNumber = (
@@ -45,7 +45,7 @@ export interface UserRouteRequest<Params = ParamData> {
   cmd: Command;
 }
 
-export default (prisma: PrismaClient, logger?: pino.Logger): Router => {
+export default (prisma: PrismaClient, logger?: Logger): Router => {
   const v1 = new Router(logger);
 
   v1.use(async (req, stream, next) => {
