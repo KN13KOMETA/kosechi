@@ -1,29 +1,10 @@
 import { ParamData } from "path-to-regexp";
 import { Logger } from "pino";
-import { ServerChannel } from "ssh2";
 import { Prisma, PrismaClient } from "../../generated/prisma/client";
 import { Command, Router } from "../../scapi";
 import ErrorResponse, { ResponseCode } from "../ErrorResponse";
 import UserPermissions from "../UserPermissions";
-
-const checkPositiveNumber = (x: any) => Number.isSafeInteger(x) && x >= 0;
-const validatePositiveNumber = (
-  name: string,
-  x: any,
-  stream: ServerChannel,
-) => {
-  if (checkPositiveNumber(x)) return true;
-
-  const res = new ErrorResponse(ResponseCode.BadRequest, {
-    message: name + " must positive number",
-    data: null,
-  });
-  stream.write(res.toString());
-  stream.exit(res.code);
-  stream.end();
-
-  return false;
-};
+import users from "./users";
 
 export interface UserRouteRequest<Params = ParamData> {
   params: Params;
@@ -102,53 +83,7 @@ export default (prisma: PrismaClient, logger?: Logger): Router => {
     return next();
   });
 
-  v1.read("/users", async (req, stream) => {
-    let startId = Number(req.cmd.json.startId);
-    let count = Number(req.cmd.json.count);
-
-    if (!checkPositiveNumber(startId) || !checkPositiveNumber(count)) {
-      startId = 0;
-      count = 50;
-    }
-
-    try {
-      const users = await prisma.user.findMany({
-        where: {
-          id: {
-            gte: startId,
-          },
-        },
-        select: req.cmd.json.select,
-        orderBy: {
-          id: "asc",
-        },
-        take: count,
-      });
-
-      stream.write(JSON.stringify(users));
-      stream.exit(0);
-    } catch (err) {
-      const res = new ErrorResponse(ResponseCode.BadRequest, {
-        message: "Bad Select",
-        data: null,
-      });
-
-      stream.write(res.toString());
-      stream.exit(res.code);
-    }
-
-    stream.end();
-  });
-
-  v1.read("/users/:userId", async (req: UserRouteRequest, stream) => {
-    const id = Number(req.params.userId);
-    if (!validatePositiveNumber("userId", id, stream)) return;
-
-    const user = await prisma.user.findUnique({ where: { id } });
-    stream.write(JSON.stringify(user));
-    stream.exit(0);
-    stream.end();
-  });
+  v1.use("/users", users(prisma, logger));
 
   return v1;
 };
