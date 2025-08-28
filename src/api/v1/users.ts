@@ -1,7 +1,11 @@
 import { Logger } from "pino";
 import { PrismaClient } from "../../generated/prisma/client";
 import { Router } from "../../scapi";
-import { checkPositiveNumber, validatePositiveNumber } from "./fun";
+import {
+  checkPositiveNumber,
+  validatePositiveNumber,
+  validateSelect,
+} from "./fun";
 import ErrorResponse, { ResponseCode } from "../ErrorResponse";
 import { UserRouteRequest } from ".";
 
@@ -16,6 +20,28 @@ export default (prisma: PrismaClient, logger?: Logger): Router => {
       startId = 0;
       count = 50;
     }
+
+    if (
+      req.cmd.json.select != null &&
+      !validateSelect(
+        req.cmd.json.select,
+        [
+          "id",
+          "displayName",
+          "name",
+          "description",
+          "pubKeyHash",
+          "firstSeen",
+          "lastSeen",
+
+          "inviterId",
+          "inviterComment",
+          "invitedAt",
+        ],
+        stream,
+      )
+    )
+      return;
 
     try {
       const users = await prisma.user.findMany({
