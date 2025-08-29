@@ -22,7 +22,7 @@ export const validateSelect = (
   if (checkSelect(select, whitelist)) return true;
 
   const res = new ErrorResponse(ResponseCode.BadRequest, {
-    message: "select is invalid",
+    message: "Bad Select: select is invalid",
     data: null,
   });
 
