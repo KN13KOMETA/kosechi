@@ -98,6 +98,22 @@ export default (prisma: PrismaClient, logger?: Logger): Router => {
     stream.exit(0);
     stream.end();
   });
+
+  users.read("/:userId/roles", async (req: UserRouteRequest, stream) => {
+    const id = Number(req.params.userId);
+    if (!validatePositiveNumber("userId", id, stream)) return;
+
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        roles: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+    stream.write(JSON.stringify(user?.roles.map((v) => v.id)));
     stream.exit(0);
     stream.end();
   });
