@@ -43,31 +43,24 @@ export default (prisma: PrismaClient, logger?: Logger): Router => {
     )
       return;
 
-    try {
-      const users = await prisma.user.findMany({
-        where: {
-          id: {
-            gte: startId,
-          },
+    const users = await prisma.user.findMany({
+      where: {
+        id: {
+          gte: startId,
         },
-        select: req.cmd.json.select,
-        orderBy: {
-          id: "asc",
-        },
-        take: count,
-      });
+      },
+      select: req.cmd.json.select,
+      orderBy: {
+        id: "asc",
+      },
+      take: count,
+    });
 
-      stream.write(JSON.stringify(users));
-      stream.exit(0);
-    } catch (err) {
-      const res = new ErrorResponse(ResponseCode.BadRequest, {
-        message: "Bad Select",
-        data: null,
-      });
+    stream.write(JSON.stringify(users));
+    stream.exit(0);
+    stream.end();
+  });
 
-      stream.write(res.toString());
-      stream.exit(res.code);
-    }
 
     stream.end();
   });
