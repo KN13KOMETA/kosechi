@@ -9,6 +9,22 @@ import {
 import ErrorResponse, { ResponseCode } from "../ErrorResponse";
 import { UserRouteRequest } from ".";
 
+const wl = {
+  user: [
+    "id",
+    "displayName",
+    "name",
+    "description",
+    "pubKeyHash",
+    "firstSeen",
+    "lastSeen",
+
+    "inviterId",
+    "inviterComment",
+    "invitedAt",
+  ],
+};
+
 export default (prisma: PrismaClient, logger?: Logger): Router => {
   const users = new Router(logger);
 
@@ -23,23 +39,7 @@ export default (prisma: PrismaClient, logger?: Logger): Router => {
 
     if (
       req.cmd.json.select != null &&
-      !validateSelect(
-        req.cmd.json.select,
-        [
-          "id",
-          "displayName",
-          "name",
-          "description",
-          "pubKeyHash",
-          "firstSeen",
-          "lastSeen",
-
-          "inviterId",
-          "inviterComment",
-          "invitedAt",
-        ],
-        stream,
-      )
+      !validateSelect(req.cmd.json.select, wl.user, stream)
     )
       return;
 
