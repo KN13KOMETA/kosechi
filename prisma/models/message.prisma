@@ -3,6 +3,7 @@ model Message {
   text      String
   timestamp DateTime
 
+  pinned    Boolean
   channel   Channel @relation(fields: [channelId], references: [id])
   channelId Int
   author    User    @relation(fields: [authorId], references: [id])
