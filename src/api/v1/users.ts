@@ -65,7 +65,6 @@ export default (prisma: PrismaClient, logger?: Logger): Router => {
     const id = Number(req.params.userId);
     if (!validatePositiveNumber("userId", id, stream)) return;
 
-    scx;
     if (
       req.cmd.json.select != null &&
       !validateSelect(req.cmd.json.select, wl.user, stream)
@@ -81,10 +80,20 @@ export default (prisma: PrismaClient, logger?: Logger): Router => {
     stream.end();
   });
 
+  users.read("/:userId/invitees", async (req: UserRouteRequest, stream) => {
     const id = Number(req.params.userId);
     if (!validatePositiveNumber("userId", id, stream)) return;
 
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        invitees: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
     stream.write(JSON.stringify(user));
     stream.exit(0);
     stream.end();
