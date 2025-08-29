@@ -94,7 +94,10 @@ export default (prisma: PrismaClient, logger?: Logger): Router => {
         },
       },
     });
-    stream.write(JSON.stringify(user));
+    stream.write(JSON.stringify(user?.invitees.map((v) => v.id)));
+    stream.exit(0);
+    stream.end();
+  });
     stream.exit(0);
     stream.end();
   });
